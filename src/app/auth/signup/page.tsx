@@ -1,6 +1,53 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function SignupPage() {
+  const { signup, isLoading, error } = useAuth();
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [formError, setFormError] = useState("");
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setFormError("");
+
+    if (!formData.name || !formData.email || !formData.password) {
+      setFormError("All fields are required");
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setFormError("Passwords do not match");
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      setFormError("Password must be at least 8 characters");
+      return;
+    }
+
+    await signup({
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+    });
+  };
+
   return (
     <main className="py-12">
       <div className="container mx-auto max-w-md px-4">
@@ -13,7 +60,13 @@ export default function SignupPage() {
             </p>
           </div>
 
-          <form className="space-y-6">
+          {(error || formError) && (
+            <div className="bg-red-50 text-red-800 p-3 rounded-md mb-6 text-sm">
+              {formError || error}
+            </div>
+          )}
+
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label
                 htmlFor="name"
@@ -24,6 +77,9 @@ export default function SignupPage() {
               <input
                 type="text"
                 id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                 placeholder="John Smith"
               />
@@ -39,6 +95,9 @@ export default function SignupPage() {
               <input
                 type="email"
                 id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                 placeholder="you@example.com"
               />
@@ -54,6 +113,9 @@ export default function SignupPage() {
               <input
                 type="password"
                 id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                 placeholder="••••••••"
               />
@@ -72,6 +134,9 @@ export default function SignupPage() {
               <input
                 type="password"
                 id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                 placeholder="••••••••"
               />
@@ -96,9 +161,10 @@ export default function SignupPage() {
 
             <button
               type="submit"
-              className="w-full bg-purple-600 text-white hover:bg-purple-700 py-2 rounded-md font-medium"
+              disabled={isLoading}
+              className="w-full bg-purple-600 text-white hover:bg-purple-700 py-2 rounded-md font-medium disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              Create Account
+              {isLoading ? "Creating Account..." : "Create Account"}
             </button>
           </form>
 

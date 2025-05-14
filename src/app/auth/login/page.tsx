@@ -1,6 +1,42 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { signIn } from "next-auth/react";
 
 export default function LoginPage() {
+  const { login, isLoading, error } = useAuth();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!formData.email || !formData.password) {
+      return;
+    }
+
+    await login({
+      email: formData.email,
+      password: formData.password,
+    });
+  };
+
+  const handleGoogleSignIn = async () => {
+    await signIn("google", { callbackUrl: "/dashboard" });
+  };
+
   return (
     <main className="py-12">
       <div className="container mx-auto max-w-md px-4">
@@ -10,7 +46,13 @@ export default function LoginPage() {
             <p className="text-gray-600">Sign in to access your account</p>
           </div>
 
-          <form className="space-y-6">
+          {error && (
+            <div className="bg-red-50 text-red-800 p-3 rounded-md mb-6 text-sm">
+              {error}
+            </div>
+          )}
+
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label
                 htmlFor="email"
@@ -21,6 +63,9 @@ export default function LoginPage() {
               <input
                 type="email"
                 id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                 placeholder="you@example.com"
               />
@@ -44,6 +89,9 @@ export default function LoginPage() {
               <input
                 type="password"
                 id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                 placeholder="••••••••"
               />
@@ -58,9 +106,10 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              className="w-full bg-purple-600 text-white hover:bg-purple-700 py-2 rounded-md font-medium"
+              disabled={isLoading}
+              className="w-full bg-purple-600 text-white hover:bg-purple-700 py-2 rounded-md font-medium disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              Sign In
+              {isLoading ? "Signing In..." : "Sign In"}
             </button>
           </form>
 
@@ -88,7 +137,11 @@ export default function LoginPage() {
           </div>
 
           <div className="mt-6 space-y-3">
-            <button className="w-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 py-2 px-4 rounded-md flex items-center justify-center font-medium">
+            <button
+              type="button"
+              className="w-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 py-2 px-4 rounded-md flex items-center justify-center font-medium"
+              onClick={handleGoogleSignIn}
+            >
               <svg
                 className="h-5 w-5 mr-2"
                 viewBox="0 0 24 24"

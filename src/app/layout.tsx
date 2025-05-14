@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import { SessionProvider } from "@/components/providers/SessionProvider";
+import { Navbar } from "@/components/layout/Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,39 +21,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <SessionProvider>
-          <header className="border-b">
-            <div className="container mx-auto max-w-6xl px-4 py-4">
-              <nav className="flex justify-between items-center">
-                <Link href="/" className="text-xl font-bold text-purple-700">
-                  Creator Marketplace
-                </Link>
-
-                <div className="flex items-center gap-6">
-                  <Link href="/products" className="hover:text-purple-700">
-                    Products
-                  </Link>
-                  <Link href="/dashboard" className="hover:text-purple-700">
-                    Dashboard
-                  </Link>
-                  {/* Auth Links */}
-                  <div className="flex items-center gap-3">
-                    <Link
-                      href="/auth/login"
-                      className="text-purple-700 hover:text-purple-800"
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      href="/auth/signup"
-                      className="bg-purple-600 text-white hover:bg-purple-700 px-4 py-2 rounded"
-                    >
-                      Sign Up
-                    </Link>
-                  </div>
-                </div>
-              </nav>
-            </div>
-          </header>
+          <Navbar />
 
           {children}
 
